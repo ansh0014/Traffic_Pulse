@@ -40,7 +40,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import (classification_report, roc_auc_score,
                               mean_absolute_error, r2_score)
 
-DATA_PATH = "Astram event data_anonymized - Astram event data_anonymizedb40ac87.csv"
+DATA_PATH = "Model/Astram event data_anonymized - Astram event data_anonymizedb40ac87.csv"
 RANDOM_STATE = 42
 
 # ----------------------------------------------------------------------------
@@ -223,9 +223,9 @@ def main():
     # ============================================================
     # Save artifacts (models + the historical lookup tables they depend on)
     # ============================================================
-    joblib.dump(imp_pipe, "./impact_severity_model.joblib")
-    joblib.dump(clo_pipe, "./closure_model.joblib")
-    joblib.dump(dur_pipe, "./duration_model.joblib")
+    joblib.dump(imp_pipe, "Model/impact_severity_model.joblib")
+    joblib.dump(clo_pipe, "Model/closure_model.joblib")
+    joblib.dump(dur_pipe, "Model/duration_model.joblib")
 
     lookups = {
         "corridor_event_volume": train["corridor"].value_counts().to_dict(),
@@ -234,7 +234,7 @@ def main():
         "global_closure_rate": float(train["requires_road_closure"].mean()),
         "global_median_duration": float(train["duration_min"].median()),
     }
-    joblib.dump(lookups, "./historical_lookups.joblib")
+    joblib.dump(lookups, "Model/historical_lookups.joblib")
     print("\nSaved: impact_severity_model.joblib, closure_model.joblib, duration_model.joblib, historical_lookups.joblib")
 
     # feature importance for impact-severity model (top real drivers, no leakage)

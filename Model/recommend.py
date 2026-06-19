@@ -23,7 +23,7 @@ import joblib
 import pandas as pd
 import numpy as np
 
-MODEL_DIR = "."
+MODEL_DIR = "Model"
 
 
 class ResourceRecommender:
