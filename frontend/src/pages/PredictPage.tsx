@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { predictImpact } from '../services/api';
-import { ShieldAlert, BarChart3, Crosshair, Zap, Navigation, Clock, Activity, Cpu } from 'lucide-react';
+import { ShieldAlert, BarChart3, Crosshair, Zap, Navigation, Clock, Activity } from 'lucide-react';
 
 export default function PredictPage() {
   const [loading, setLoading] = useState(false);
@@ -23,10 +23,7 @@ export default function PredictPage() {
     setLoading(true);
     setError('');
     try {
-      const payload = {
-        ...formData,
-        start_datetime: new Date(formData.start_datetime).toISOString(),
-      };
+      const payload = { ...formData, start_datetime: new Date(formData.start_datetime).toISOString() };
       const res = await predictImpact(payload);
       setResult(res);
     } catch (err: any) {
@@ -36,53 +33,52 @@ export default function PredictPage() {
     }
   };
 
-  return (
-    <div className="space-y-8 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000 relative">
-      
-      {/* Decorative background effects specific to this page */}
-      <div className="absolute top-20 right-10 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] -z-10 pointer-events-none mix-blend-screen hidden dark:block"></div>
+  const inputClass = 'tp-input w-full px-3 py-2.5 text-sm';
+  const labelClass = 'block text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-widest mb-1.5';
 
+  return (
+    <div className="space-y-6 max-w-7xl mx-auto animate-fade-up">
+
+      {/* ── Header ── */}
       <div>
-        <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
-          Impact <span className="text-gradient">Forecast</span>
-          <Cpu className="text-brand-500" size={28} />
+        <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)] flex items-center gap-2">
+          Impact Forecast
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)] border border-[var(--border)]">AI</span>
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium text-lg">
-          Deploy AI to analyze real-time grid conditions and generate precise resource constraints.
+        <p className="text-sm text-[var(--muted-foreground)] mt-0.5">
+          Analyze real-time grid conditions and generate precise resource constraints.
         </p>
       </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Left Column: Form */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="glass-panel p-6 border-t-4 border-t-brand-500 shadow-glow-blue relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-bl-full -mr-8 -mt-8"></div>
-            
-            <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800 dark:text-white relative z-10">
-              <Crosshair size={20} className="text-brand-500" />
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        {/* ── Form ── */}
+        <div className="lg:col-span-4">
+          <div className="tp-card p-5">
+            <h2 className="text-sm font-semibold text-[var(--foreground)] flex items-center gap-2 mb-5">
+              <Crosshair size={15} className="text-[var(--muted-foreground)]" />
               Incident Parameters
             </h2>
-            
-            <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Temporal Vector</label>
-                <input 
-                  type="datetime-local" 
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className={labelClass}>Date &amp; Time</label>
+                <input
+                  type="datetime-local"
                   name="start_datetime"
                   value={formData.start_datetime}
                   onChange={handleChange}
-                  className="w-full bg-white/50 dark:bg-[#050b14]/50 border border-slate-200 dark:border-slate-700/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50 outline-none transition-all dark:text-white font-mono text-sm shadow-inner"
+                  className={inputClass}
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Event Classifier</label>
-                <select 
+              <div>
+                <label className={labelClass}>Event Type</label>
+                <select
                   name="event_cause"
                   value={formData.event_cause}
                   onChange={handleChange}
-                  className="w-full bg-white/50 dark:bg-[#050b14]/50 border border-slate-200 dark:border-slate-700/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50 outline-none transition-all dark:text-white font-medium text-sm shadow-inner appearance-none cursor-pointer"
+                  className={inputClass}
                 >
                   <option value="vehicle_breakdown">Vehicle Breakdown</option>
                   <option value="accident">Major Accident</option>
@@ -92,225 +88,182 @@ export default function PredictPage() {
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Lat</label>
-                  <input 
-                    type="number" step="any"
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelClass}>Latitude</label>
+                  <input
+                    type="number"
+                    step="any"
                     name="latitude"
                     value={formData.latitude}
                     onChange={handleChange}
-                    className="w-full bg-white/50 dark:bg-[#050b14]/50 border border-slate-200 dark:border-slate-700/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-500/50 outline-none dark:text-white font-mono text-sm shadow-inner"
+                    className={inputClass}
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Lng</label>
-                  <input 
-                    type="number" step="any"
+                <div>
+                  <label className={labelClass}>Longitude</label>
+                  <input
+                    type="number"
+                    step="any"
                     name="longitude"
                     value={formData.longitude}
                     onChange={handleChange}
-                    className="w-full bg-white/50 dark:bg-[#050b14]/50 border border-slate-200 dark:border-slate-700/50 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-500/50 outline-none dark:text-white font-mono text-sm shadow-inner"
+                    className={inputClass}
                   />
                 </div>
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={loading}
-                className="w-full mt-6 bg-gradient-to-r from-brand-600 to-cyan-500 hover:from-brand-500 hover:to-cyan-400 text-white font-bold py-3.5 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all active:scale-[0.98] flex items-center justify-center gap-2 overflow-hidden relative group"
+                className="tp-btn-primary w-full py-2.5 text-sm flex items-center justify-center gap-2 mt-2"
               >
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
                 {loading ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span className="relative z-10 tracking-wider">Processing Matrix...</span>
+                    <div className="w-4 h-4 border-2 border-[var(--primary-foreground)]/30 border-t-[var(--primary-foreground)] rounded-full animate-spin-slow" />
+                    Processing…
                   </>
                 ) : (
                   <>
-                    <Zap size={18} className="relative z-10 animate-pulse" />
-                    <span className="relative z-10 tracking-wider uppercase">Execute Analysis</span>
+                    <Zap size={15} />
+                    Run Analysis
                   </>
                 )}
               </button>
             </form>
           </div>
         </div>
-        
-        {/* Right Column: Results */}
-        <div className="lg:col-span-8 space-y-6">
+
+        {/* ── Results ── */}
+        <div className="lg:col-span-8 space-y-4">
           {error && (
-            <div className="glass-panel severity-high p-4 flex items-center gap-3 animate-in slide-in-from-top-2">
-              <ShieldAlert size={20} className="animate-pulse" />
-              <p className="font-medium tracking-wide">{error}</p>
+            <div className="tp-card p-4 flex items-center gap-3 border-[var(--destructive)]/40 bg-[var(--destructive)]/5">
+              <ShieldAlert size={16} className="text-[var(--destructive)] shrink-0" />
+              <p className="text-sm text-[var(--destructive)] font-medium">{error}</p>
             </div>
           )}
 
           {!result && !loading && !error && (
-            <div className="glass-panel h-full min-h-[500px] flex flex-col items-center justify-center text-slate-500 p-8 text-center border-dashed border-2 border-slate-300 dark:border-slate-700/50 bg-slate-50/50 dark:bg-[#050b14]/30 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
-              <div className="relative z-10 flex flex-col items-center">
-                <div className="w-20 h-20 mb-6 rounded-full bg-slate-100 dark:bg-slate-800/50 flex items-center justify-center border border-slate-200 dark:border-slate-700/50 group-hover:scale-110 transition-transform duration-700 group-hover:shadow-glow-blue">
-                  <BarChart3 size={40} className="text-slate-300 dark:text-slate-600 group-hover:text-brand-500 transition-colors duration-700" />
-                </div>
-                <h3 className="text-2xl font-bold text-slate-700 dark:text-slate-300 mb-2 tracking-tight">System Standby</h3>
-                <p className="max-w-md text-sm leading-relaxed">
-                  Input coordinates and incident type into the engine. The Random Forest matrix will compute geospatial impact boundaries and resource allocation constraints.
-                </p>
+            <div className="tp-card min-h-[420px] flex flex-col items-center justify-center text-center p-8 border-dashed">
+              <div className="w-16 h-16 mb-5 rounded-full bg-[var(--muted)] flex items-center justify-center">
+                <BarChart3 size={28} className="text-[var(--muted-foreground)]" />
               </div>
+              <h3 className="text-base font-semibold text-[var(--foreground)] mb-1">Awaiting Input</h3>
+              <p className="text-sm text-[var(--muted-foreground)] max-w-sm leading-relaxed">
+                Configure incident parameters and run the analysis to see AI-generated forecasts and resource recommendations.
+              </p>
             </div>
           )}
 
           {result && (
-            <div className="space-y-6 animate-in slide-in-from-right-8 duration-700">
-              
-              {/* Primary Metrics Row */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
-                <div className={`glass-panel p-6 border-t-4 relative overflow-hidden group ${
-                  result.prediction.impact_severity === 'High' ? 'border-t-rose-500 shadow-[0_0_30px_rgba(225,29,72,0.1)]' : 
-                  result.prediction.impact_severity === 'Medium' ? 'border-t-amber-500 shadow-[0_0_30px_rgba(217,119,6,0.1)]' : 'border-t-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.1)]'
-                }`}>
-                  <div className={`absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 opacity-10 ${
-                    result.prediction.impact_severity === 'High' ? 'bg-rose-500' : 
-                    result.prediction.impact_severity === 'Medium' ? 'bg-amber-500' : 'bg-emerald-500'
-                  }`}></div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 relative z-10">Calculated Impact</p>
-                  <p className={`text-4xl font-extrabold tracking-tight relative z-10 ${
-                    result.prediction.impact_severity === 'High' ? 'text-rose-500 drop-shadow-[0_0_8px_rgba(225,29,72,0.4)]' : 
-                    result.prediction.impact_severity === 'Medium' ? 'text-amber-500' : 'text-emerald-500'
+            <div className="space-y-4 animate-fade-up">
+
+              {/* Primary metrics */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Severity */}
+                <div className="tp-card p-5">
+                  <p className={labelClass}>Impact Severity</p>
+                  <p className={`text-3xl font-extrabold tracking-tight mt-1 ${
+                    result.prediction.impact_severity === 'High'   ? 'text-[var(--destructive)]' :
+                    result.prediction.impact_severity === 'Medium' ? 'text-amber-500'            : 'text-green-600 dark:text-green-400'
                   }`}>
                     {result.prediction.impact_severity}
                   </p>
-                  <div className="mt-4 flex items-center gap-2">
-                    <span className="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-600 dark:text-slate-400">
-                      Conf: {(result.prediction.severity_probability * 100).toFixed(1)}%
-                    </span>
-                  </div>
+                  <p className="text-xs text-[var(--muted-foreground)] mt-2 font-mono">
+                    Conf: {(result.prediction.severity_probability * 100).toFixed(1)}%
+                  </p>
                 </div>
 
-                <div className="glass-panel p-6 border-t-4 border-t-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.1)] relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-bl-full -mr-4 -mt-4 group-hover:scale-125 transition-transform duration-500"></div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 relative z-10">Est. Clearance</p>
-                  <div className="flex items-baseline gap-1 relative z-10">
-                    <p className="text-4xl font-extrabold tracking-tight text-indigo-500 drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]">
+                {/* Clearance */}
+                <div className="tp-card p-5">
+                  <p className={labelClass}>Est. Clearance</p>
+                  <div className="flex items-baseline gap-1 mt-1">
+                    <p className="text-3xl font-extrabold tracking-tight text-[var(--foreground)]">
                       {result.prediction.clearance_time_hours.toFixed(1)}
                     </p>
-                    <span className="text-sm font-bold text-indigo-500/60 uppercase">hrs</span>
+                    <span className="text-sm font-semibold text-[var(--muted-foreground)]">hrs</span>
                   </div>
-                  <div className="mt-4 flex items-center gap-2">
-                    <Clock size={14} className="text-slate-400" />
-                    <span className="text-xs font-medium text-slate-500">predicted duration</span>
+                  <div className="flex items-center gap-1.5 mt-2 text-xs text-[var(--muted-foreground)]">
+                    <Clock size={12} /> predicted duration
                   </div>
                 </div>
 
-                <div className={`glass-panel p-6 border-t-4 relative overflow-hidden group ${
-                  result.prediction.road_closure_probability > 0.5 ? 'border-t-rose-500 shadow-[0_0_30px_rgba(225,29,72,0.1)]' : 'border-t-emerald-500'
-                }`}>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Closure Risk</p>
-                  <div className="flex items-baseline gap-1">
-                    <p className={`text-4xl font-extrabold tracking-tight ${result.prediction.road_closure_probability > 0.5 ? 'text-rose-500 drop-shadow-[0_0_8px_rgba(225,29,72,0.4)]' : 'text-slate-800 dark:text-white'}`}>
-                      {(result.prediction.road_closure_probability * 100).toFixed(0)}
-                    </p>
-                    <span className="text-sm font-bold text-slate-400 uppercase">%</span>
-                  </div>
-                  
-                  {/* Progress bar visual */}
-                  <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full mt-5 overflow-hidden">
-                    <div 
-                      className={`h-full rounded-full ${result.prediction.road_closure_probability > 0.5 ? 'bg-rose-500 shadow-glow-red' : 'bg-emerald-500'}`}
+                {/* Closure risk */}
+                <div className="tp-card p-5">
+                  <p className={labelClass}>Closure Risk</p>
+                  <p className={`text-3xl font-extrabold tracking-tight mt-1 ${result.prediction.road_closure_probability > 0.5 ? 'text-[var(--destructive)]' : 'text-[var(--foreground)]'}`}>
+                    {(result.prediction.road_closure_probability * 100).toFixed(0)}%
+                  </p>
+                  <div className="w-full h-1 bg-[var(--muted)] rounded-full mt-3 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-700 ${result.prediction.road_closure_probability > 0.5 ? 'bg-[var(--destructive)]' : 'bg-[var(--chart-3)]'}`}
                       style={{ width: `${result.prediction.road_closure_probability * 100}%` }}
-                    ></div>
+                    />
                   </div>
                 </div>
-
               </div>
 
-              {/* Recommendation Engine Output */}
-              <div className="glass-panel p-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
-                
-                <h3 className="text-xl font-extrabold mb-6 flex items-center gap-3 text-slate-800 dark:text-white">
-                  <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500">
-                    <ShieldAlert size={18} />
-                  </div>
-                  Engineered Action Plan
+              {/* Action Plan */}
+              <div className="tp-card p-5">
+                <h3 className="text-sm font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
+                  <ShieldAlert size={15} className="text-[var(--muted-foreground)]" />
+                  Action Plan
                 </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
-                  <div className="bg-gradient-to-br from-brand-500/10 to-cyan-500/5 border border-brand-500/20 rounded-2xl p-6 shadow-inner relative overflow-hidden group">
-                    <div className="absolute right-0 bottom-0 text-brand-500/10 group-hover:scale-110 transition-transform duration-500">
-                      <Activity size={120} className="-mb-8 -mr-8" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Personnel */}
+                  <div className="tp-muted p-4 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-[var(--radius-sm)] bg-[var(--background)] border border-[var(--border)] flex items-center justify-center text-[var(--muted-foreground)]">
+                      <Activity size={16} />
                     </div>
-                    <p className="text-xs font-bold text-brand-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
-                      Dispatch Protocol
-                    </p>
-                    <p className="text-slate-700 dark:text-slate-300 text-lg font-medium leading-relaxed mt-4">
-                      Deploy <span className="text-3xl font-extrabold text-brand-500 tracking-tight mx-1">{result.recommendation.recommended_personnel}</span> units to coordinate grid lock.
-                    </p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="bg-white/40 dark:bg-[#050b14]/40 border border-slate-200 dark:border-slate-700/50 rounded-xl p-5 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
-                          <Navigation size={18} />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-slate-800 dark:text-white">Traffic Diversion</p>
-                          <p className="text-xs text-slate-500 mt-0.5">Route alternatives required</p>
-                        </div>
-                      </div>
-                      <div className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${result.recommendation.diversions_required ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
-                        {result.recommendation.diversions_required ? 'Execute' : 'Standby'}
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white/40 dark:bg-[#050b14]/40 border border-slate-200 dark:border-slate-700/50 rounded-xl p-5 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
-                          <ShieldAlert size={18} />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-slate-800 dark:text-white">Physical Barricades</p>
-                          <p className="text-xs text-slate-500 mt-0.5">Perimeter containment</p>
-                        </div>
-                      </div>
-                      <p className="text-2xl font-extrabold text-slate-800 dark:text-white">
-                        {result.recommendation.recommended_barricades}
+                    <div>
+                      <p className="text-xs text-[var(--muted-foreground)] font-medium">Dispatch</p>
+                      <p className="text-xl font-bold text-[var(--foreground)]">
+                        {result.recommendation.recommended_personnel} units
                       </p>
                     </div>
                   </div>
+
+                  {/* Diversion */}
+                  <div className="tp-muted p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-[var(--radius-sm)] bg-[var(--background)] border border-[var(--border)] flex items-center justify-center text-[var(--muted-foreground)]">
+                        <Navigation size={16} />
+                      </div>
+                      <div>
+                        <p className="text-xs text-[var(--muted-foreground)] font-medium">Traffic Diversion</p>
+                        <p className="text-xs text-[var(--muted-foreground)]">Route alternatives</p>
+                      </div>
+                    </div>
+                    <span className={`text-xs font-bold px-2 py-1 rounded border ${result.recommendation.diversions_required ? 'severity-high' : 'bg-[var(--muted)] text-[var(--muted-foreground)] border-[var(--border)]'}`}>
+                      {result.recommendation.diversions_required ? 'Required' : 'Standby'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* SHAP Explanations */}
-              {result.explanation && result.explanation.top_features && (
-                <div className="glass-panel p-8">
-                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6 border-b border-slate-200 dark:border-slate-800 pb-4">
-                    AI Decision Matrix (SHAP Values)
+              {/* SHAP */}
+              {result.explanation?.top_features && (
+                <div className="tp-card p-5">
+                  <h3 className="text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-widest mb-4 pb-3 border-b border-[var(--border)]">
+                    AI Decision Factors (SHAP)
                   </h3>
-                  <div className="space-y-5">
-                    {result.explanation.top_features.map((feature: any, idx: number) => (
-                      <div key={idx} className="relative group">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-bold text-slate-700 dark:text-slate-300 font-mono tracking-tight">
-                            {feature.feature}
-                          </span>
-                          <span className={`text-sm font-bold font-mono ${feature.value > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
-                            {feature.value > 0 ? '+' : ''}{feature.value.toFixed(3)}
+                  <div className="space-y-4">
+                    {result.explanation.top_features.map((f: any, i: number) => (
+                      <div key={i}>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-xs font-medium text-[var(--foreground)] font-mono">{f.feature}</span>
+                          <span className={`text-xs font-bold font-mono ${f.value > 0 ? 'text-[var(--destructive)]' : 'text-green-600 dark:text-green-400'}`}>
+                            {f.value > 0 ? '+' : ''}{f.value.toFixed(3)}
                           </span>
                         </div>
-                        
-                        <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-full overflow-hidden flex">
-                          <div 
-                            className={`h-full ${feature.value > 0 ? 'bg-gradient-to-r from-rose-600 to-rose-400 shadow-glow-red' : 'bg-gradient-to-r from-emerald-600 to-emerald-400 shadow-glow-emerald'} transition-all duration-1000 ease-out`}
-                            style={{ 
-                              width: `${Math.min(Math.abs(feature.value) * 100, 100)}%`,
-                              marginLeft: feature.value > 0 ? '50%' : `${50 - Math.min(Math.abs(feature.value) * 100, 50)}%`
+                        <div className="w-full h-1 bg-[var(--muted)] rounded-full overflow-hidden flex">
+                          <div
+                            className={`h-full rounded-full transition-all duration-700 ${f.value > 0 ? 'bg-[var(--destructive)]' : 'bg-[var(--chart-3)]'}`}
+                            style={{
+                              width: `${Math.min(Math.abs(f.value) * 100, 100)}%`,
+                              marginLeft: f.value > 0 ? '50%' : `${50 - Math.min(Math.abs(f.value) * 100, 50)}%`,
                             }}
-                          ></div>
+                          />
                         </div>
                       </div>
                     ))}
