@@ -6,7 +6,7 @@ import logging
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 
-from backend.app.config import get_settings
+from app.config import get_settings
 
 logger = logging.getLogger("traffic_pulse.db")
 settings = get_settings()

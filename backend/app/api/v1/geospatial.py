@@ -7,10 +7,10 @@ from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from backend.app.database import get_db
-from backend.app.models import Incident, Prediction
+from app.database import get_db
+from app.models import Incident, Prediction
 
-logger = logging.getLogger("gridlock.api.geospatial")
+logger = logging.getLogger("traffic_pulse.api.geospatial")
 router = APIRouter(tags=["Geospatial"])
 
 # Approximate corridor polyline coordinates (Bengaluru major corridors)

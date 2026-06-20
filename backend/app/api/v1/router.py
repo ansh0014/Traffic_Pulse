@@ -3,12 +3,12 @@ API v1 router — aggregates all v1 route modules.
 """
 from fastapi import APIRouter
 
-from backend.app.api.v1.health import router as health_router
-from backend.app.api.v1.predict import router as predict_router
-from backend.app.api.v1.incidents import router as incidents_router
-from backend.app.api.v1.metrics import router as metrics_router
-from backend.app.api.v1.alerts import router as alerts_router
-from backend.app.api.v1.geospatial import router as geospatial_router
+from app.api.v1.health import router as health_router
+from app.api.v1.predict import router as predict_router
+from app.api.v1.incidents import router as incidents_router
+from app.api.v1.metrics import router as metrics_router
+from app.api.v1.alerts import router as alerts_router
+from app.api.v1.geospatial import router as geospatial_router
 
 api_v1_router = APIRouter(prefix="/api/v1")
 

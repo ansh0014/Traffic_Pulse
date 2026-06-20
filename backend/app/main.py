@@ -9,10 +9,10 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from backend.app.config import get_settings
-from backend.app.database import init_db
-from backend.app.api.v1.router import api_v1_router
-from backend.app.services.prediction import get_prediction_service
+from app.config import get_settings
+from app.database import init_db
+from app.api.v1.router import api_v1_router
+from app.services.prediction import get_prediction_service
 
 logger = logging.getLogger("traffic_pulse")
 

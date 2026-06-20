@@ -3,7 +3,7 @@ Health check endpoint.
 """
 from fastapi import APIRouter
 
-from backend.app.services.prediction import get_prediction_service
+from app.services.prediction import get_prediction_service
 
 router = APIRouter(tags=["Health"])
 
@@ -25,5 +25,5 @@ async def health_check():
         "status": "healthy" if models_loaded else "degraded",
         "models_loaded": models_loaded,
         "version": "2.0.0",
-        "service": "GridLock Traffic Management Platform",
+        "service": "Traffic Pulse — Smart Traffic Management Platform",
     }
