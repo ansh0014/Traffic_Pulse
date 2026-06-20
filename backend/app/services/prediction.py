@@ -1,5 +1,5 @@
 """
-GridLock 2.0 — Prediction Service
+Traffic-Pulse — Prediction Service
 ===================================
 Wraps the 3 ML models: impact severity, road closure, clearance time.
 Handles featurization, prediction, and optional SHAP explanations.
@@ -11,9 +11,9 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from backend.app.config import get_settings
+from app.config import get_settings
 
-logger = logging.getLogger("gridlock.prediction")
+logger = logging.getLogger("traffic_pulse.prediction")
 
 # Feature columns expected by the sklearn pipelines
 FEATURES_CAT = ["event_type", "event_cause", "corridor", "zone", "veh_type", "police_station"]
@@ -38,7 +38,6 @@ class PredictionService:
         self.lookups = joblib.load(model_dir / "historical_lookups.joblib")
         logger.info("All models loaded successfully")
 
-        # SHAP explainer (lazy init)
         self._impact_explainer = None
 
     def featurize(self, event: dict) -> pd.DataFrame:

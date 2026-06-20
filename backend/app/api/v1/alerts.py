@@ -7,11 +7,11 @@ from sqlalchemy import select, func, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from backend.app.database import get_db
-from backend.app.models import Alert, Prediction, Incident
-from backend.app.schemas.alert import AlertOut, AlertListResponse, AlertMarkRead
+from app.database import get_db
+from app.models import Alert, Prediction, Incident
+from app.schemas.alert import AlertOut, AlertListResponse, AlertMarkRead
 
-logger = logging.getLogger("gridlock.api.alerts")
+logger = logging.getLogger("traffic_pulse.api.alerts")
 router = APIRouter(tags=["Alerts"])
 
 

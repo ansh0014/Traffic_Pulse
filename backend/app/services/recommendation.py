@@ -1,5 +1,5 @@
 """
-GridLock 2.0 — Recommendation Service
+Traffic Pulse — Recommendation Service
 ========================================
 Converts ML model predictions into concrete resource deployment plans.
 
@@ -10,7 +10,7 @@ Improved over the original fixed-rule engine:
 """
 import logging
 
-logger = logging.getLogger("gridlock.recommendation")
+logger = logging.getLogger("traffic_pulse.recommendation")
 
 # Default resource pools (configurable per deployment)
 DEFAULT_PERSONNEL_POOL = 50

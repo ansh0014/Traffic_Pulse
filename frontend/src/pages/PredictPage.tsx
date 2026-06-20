@@ -25,7 +25,25 @@ export default function PredictPage() {
     try {
       const payload = { ...formData, start_datetime: new Date(formData.start_datetime).toISOString() };
       const res = await predictImpact(payload);
-      setResult(res);
+      const mappedRes = {
+        prediction: {
+          impact_severity: res.impact_tier,
+          severity_probability: res.impact_confidence ? (res.impact_confidence[res.impact_tier] || 0.0) : 0.0,
+          clearance_time_hours: res.expected_clearance_min ? (res.expected_clearance_min / 60.0) : 0.0,
+          road_closure_probability: res.closure_probability || 0.0,
+        },
+        recommendation: {
+          recommended_personnel: res.recommended_manpower || 0,
+          diversions_required: res.activate_diversion_plan || false,
+        },
+        explanation: res.explanation ? {
+          top_features: res.explanation.map((f: any) => ({
+            feature: f.feature,
+            value: f.contribution || 0.0,
+          }))
+        } : null,
+      };
+      setResult(mappedRes);
     } catch (err: any) {
       setError(err.message || 'Failed to generate prediction');
     } finally {

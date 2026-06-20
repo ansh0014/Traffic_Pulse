@@ -2,12 +2,13 @@
 Traffic Pulse — SQLAlchemy ORM Models
 Database models for incidents, predictions, alerts, and model versions.
 """
+
 from datetime import datetime, timezone
 from sqlalchemy import (
     Column, Integer, String, Float, Boolean, DateTime, Text, ForeignKey, JSON
 )
 from sqlalchemy.orm import relationship
-from backend.app.database import Base
+from app.database import Base
 
 
 class Incident(Base):
@@ -23,10 +24,10 @@ class Incident(Base):
     police_station = Column(String(100), default="Unknown")
     latitude = Column(Float, default=12.97)
     longitude = Column(Float, default=77.59)
-    start_datetime = Column(DateTime, nullable=False)
+    start_datetime = Column(DateTime(timezone=True), nullable=False)
     status = Column(String(20), default="active")         # active / closed / resolved
     address = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     predictions = relationship("Prediction", back_populates="incident", cascade="all, delete-orphan")
@@ -62,7 +63,7 @@ class Prediction(Base):
     # SHAP explanations (JSON blob)
     shap_explanation_json = Column(JSON, nullable=True)
 
-    predicted_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    predicted_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     incident = relationship("Incident", back_populates="predictions")
@@ -80,7 +81,7 @@ class Alert(Base):
     message = Column(Text, nullable=False)
     is_read = Column(Boolean, default=False)
     email_sent = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     prediction = relationship("Prediction", back_populates="alerts")
@@ -97,4 +98,4 @@ class ModelVersion(Base):
     primary_metric = Column(Float, nullable=True)
     metric_name = Column(String(30), nullable=True)       # recall_high, roc_auc, mae
     is_active = Column(Boolean, default=False)
-    trained_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    trained_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

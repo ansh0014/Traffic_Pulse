@@ -6,10 +6,10 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.database import get_db
-from backend.app.models import ModelVersion
+from app.database import get_db
+from app.models import ModelVersion
 
-logger = logging.getLogger("gridlock.api.metrics")
+logger = logging.getLogger("traffic_pulse.api.metrics")
 router = APIRouter(tags=["Metrics"])
 
 

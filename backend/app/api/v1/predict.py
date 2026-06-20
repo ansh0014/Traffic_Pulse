@@ -7,17 +7,17 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.database import get_db
-from backend.app.models import Incident, Prediction
-from backend.app.schemas.predict import (
+from app.database import get_db
+from app.models import Incident, Prediction
+from app.schemas.predict import (
     PredictRequest, PredictResponse, FeatureContribution,
     BatchPredictRequest, BatchPredictResponse,
 )
-from backend.app.services.prediction import get_prediction_service
-from backend.app.services.recommendation import get_recommendation_service
-from backend.app.services.alert_service import get_alert_service
+from app.services.prediction import get_prediction_service
+from app.services.recommendation import get_recommendation_service
+from app.services.alert_service import get_alert_service
 
-logger = logging.getLogger("gridlock.api.predict")
+logger = logging.getLogger("traffic_pulse.api.predict")
 router = APIRouter(tags=["Predictions"])
 
 
@@ -49,9 +49,16 @@ async def _process_single_prediction(
     await db.flush()  # get incident.id
 
     # 2. Run ML predictions
+    import time
+    start_time = time.perf_counter()
     event_dict = event_req.model_dump()
     event_dict["start_datetime"] = str(event_req.start_datetime)
     prediction_result = pred_svc.predict(event_dict)
+    latency_ms = (time.perf_counter() - start_time) * 1000
+
+    # Record metrics
+    from app.api.v1.metrics import record_prediction
+    record_prediction(prediction_result["impact_tier"], latency_ms)
 
     # 3. Generate resource recommendation
     resource_plan = rec_svc.recommend(prediction_result, event_dict)
@@ -125,6 +132,8 @@ async def predict(
         return await _process_single_prediction(event, db, explain=explain)
     except Exception as e:
         logger.exception("Prediction failed")
+        from app.api.v1.metrics import record_error
+        record_error()
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
 
@@ -145,6 +154,8 @@ async def batch_predict(
             results.append(result)
         except Exception as e:
             logger.error("Batch item failed: %s", e)
+            from app.api.v1.metrics import record_error
+            record_error()
             continue
 
     return BatchPredictResponse(predictions=results, total=len(results))

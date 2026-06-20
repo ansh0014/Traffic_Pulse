@@ -18,6 +18,7 @@ class FeatureContribution(BaseModel):
 class PredictRequest(BaseModel):
     """Request body for single event prediction."""
     event_type: Literal["planned", "unplanned"] = Field(
+        default="unplanned",
         description="Whether the event is planned or unplanned"
     )
     event_cause: str = Field(

@@ -1,5 +1,5 @@
 """
-GridLock 2.0 — Alert Service
+Traffic Pulse — Alert Service
 ==============================
 Generates alerts when predictions cross configured thresholds.
 Supports dashboard notifications and optional email via SMTP.
@@ -9,10 +9,10 @@ from datetime import datetime, timezone
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.config import get_settings
-from backend.app.models import Alert, Prediction, Incident
+from app.config import get_settings
+from app.models import Alert, Prediction, Incident
 
-logger = logging.getLogger("gridlock.alerts")
+logger = logging.getLogger("traffic_pulse.alerts")
 
 
 class AlertService:
@@ -59,7 +59,7 @@ class AlertService:
                 alert_type="closure_risk",
                 severity="warning",
                 message=(
-                    f"⚠️ CLOSURE RISK: {prediction.closure_probability:.0%} probability of road closure "
+                    f" CLOSURE RISK: {prediction.closure_probability:.0%} probability of road closure "
                     f"for {incident.event_cause} on {incident.corridor}. "
                     f"Diversion plan {'activated' if prediction.activate_diversion else 'recommended'}."
                 ),
@@ -105,8 +105,8 @@ class AlertService:
 
             settings = get_settings()
 
-            subject = f"GridLock Alert: {incident.event_cause} on {incident.corridor}"
-            body_lines = [f"<h2>GridLock 2.0 Alert</h2>"]
+            subject = f"Traffic Pulse Alert: {incident.event_cause} on {incident.corridor}"
+            body_lines = [f"<h2>Traffic Pulse Alert</h2>"]
             for alert in alerts:
                 color = {"critical": "#ef4444", "warning": "#f59e0b", "info": "#3b82f6"}
                 body_lines.append(
