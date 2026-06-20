@@ -1,6 +1,5 @@
 """
-GridLock 2.0 — SQLAlchemy ORM Models
-======================================
+Traffic Pulse — SQLAlchemy ORM Models
 Database models for incidents, predictions, alerts, and model versions.
 """
 from datetime import datetime, timezone

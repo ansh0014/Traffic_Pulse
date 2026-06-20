@@ -1,45 +1,41 @@
 """
-GridLock 2.0 — Application Configuration
-==========================================
-Loads settings from environment variables / .env file.
-Uses pydantic-settings for validation and type coercion.
+Traffic Pulse — Application Configuration
+All values are read from environment variables (via a .env file).
+See .env.example for the full list of required and optional variables.
 """
 from pathlib import Path
 from functools import lru_cache
-from pydantic_settings import BaseSettings
 from pydantic import Field
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    """Application settings loaded from .env file or environment variables."""
 
-    # Database
-    database_url: str = "sqlite+aiosqlite:///./gridlock.db"
+ 
+    database_url: str = Field(..., alias="DATABASE_URL")
 
-    # ML Models
-    model_dir: str = "Model"
+    model_dir: str = Field(..., alias="MODEL_DIR")
 
-    # Server
-    host: str = "0.0.0.0"
-    port: int = 8000
-    log_level: str = "INFO"
+    host: str = Field(..., alias="HOST")
+    port: int = Field(..., alias="PORT")
+    log_level: str = Field(..., alias="LOG_LEVEL")
 
-    # CORS
-    cors_origins: str = "http://localhost:5173,http://localhost:3000"
+    
+    cors_origins: str = Field(..., alias="CORS_ORIGINS")
 
-    # SMTP Email Alerts
-    smtp_host: str = ""
-    smtp_port: int = 587
-    smtp_user: str = ""
-    smtp_password: str = ""
-    alert_email_recipients: str = ""
+───────────────────
+    smtp_host: str = Field("", alias="SMTP_HOST")
+    smtp_port: int = Field(587, alias="SMTP_PORT")
+    smtp_user: str = Field("", alias="SMTP_USER")
+    smtp_password: str = Field("", alias="SMTP_PASSWORD")
+    alert_email_recipients: str = Field("", alias="ALERT_EMAIL_RECIPIENTS")
 
-    # Alert Thresholds
-    high_impact_clearance_threshold_min: float = 360.0
-    closure_prob_alert_threshold: float = 0.7
+ 
+    high_impact_clearance_threshold_min: float = Field(..., alias="HIGH_IMPACT_CLEARANCE_THRESHOLD_MIN")
+    closure_prob_alert_threshold: float = Field(..., alias="CLOSURE_PROB_ALERT_THRESHOLD")
 
-    # Retraining schedule (cron expression, empty to disable)
-    retrain_schedule: str = ""
+   
+    retrain_schedule: str = Field("", alias="RETRAIN_SCHEDULE")
 
     @property
     def cors_origin_list(self) -> list[str]:
@@ -57,7 +53,12 @@ class Settings(BaseSettings):
     def email_enabled(self) -> bool:
         return bool(self.smtp_host and self.smtp_user)
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "extra": "ignore",
+        "populate_by_name": True,
+    }
 
 
 @lru_cache()
