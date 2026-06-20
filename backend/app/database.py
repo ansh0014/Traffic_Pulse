@@ -1,33 +1,33 @@
 """
-GridLock 2.0 — Database Setup
-==============================
-Async SQLAlchemy engine and session factory.
-Supports SQLite (dev) and PostgreSQL (prod) via DATABASE_URL.
+Traffic Pulse — Database Setup
+Async SQLAlchemy engine and session factory for PostgreSQL.
 """
+import logging
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 
 from backend.app.config import get_settings
 
+logger = logging.getLogger("traffic_pulse.db")
 settings = get_settings()
 
 engine = create_async_engine(
     settings.database_url,
     echo=settings.log_level == "DEBUG",
-    # SQLite needs check_same_thread=False for async
-    connect_args={"check_same_thread": False} if "sqlite" in settings.database_url else {},
+    pool_size=5,
+    max_overflow=10,
+    pool_pre_ping=True,   # drops stale connections automatically
 )
 
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 class Base(DeclarativeBase):
-    """Base class for all ORM models."""
     pass
 
 
 async def get_db() -> AsyncSession:
-    """FastAPI dependency: yields an async DB session."""
+    """FastAPI dependency: yields a transactional async DB session."""
     async with async_session() as session:
         try:
             yield session
@@ -38,6 +38,7 @@ async def get_db() -> AsyncSession:
 
 
 async def init_db():
-    """Create all tables. Called at application startup."""
+    """Create all tables at startup (idempotent — safe to call on every boot)."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    logger.info("Database tables ensured")
