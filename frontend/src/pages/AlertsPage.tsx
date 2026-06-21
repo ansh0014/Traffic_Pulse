@@ -22,24 +22,41 @@ export default function AlertsPage() {
   const [severityFilter, setSeverityFilter] = useState<string>('');
   const [readFilter, setReadFilter] = useState<boolean | undefined>(undefined);
 
-  async function loadAlerts() {
-    setLoading(true);
-    try {
-      const data = await fetchAlerts({
-        severity: severityFilter || undefined,
-        is_read: readFilter
-      });
-      setAlerts(data.alerts || []);
-    } catch (err) {
-      console.error('Failed to load alerts:', err);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
-    loadAlerts();
-  }, [severityFilter, readFilter]);
+    let active = true;
+    async function getAlerts() {
+      try {
+        const data = await fetchAlerts({
+          severity: severityFilter || undefined,
+          is_read: readFilter
+        });
+        if (active) {
+          setAlerts(data.alerts || []);
+        }
+      } catch (err) {
+        console.error('Failed to load alerts:', err);
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    Promise.resolve().then(() => {
+      if (active) setLoading(true);
+    });
+    getAlerts();
+
+    return () => {
+      active = false;
+    };
+  }, [severityFilter, readFilter, refreshTrigger]);
+
+  const loadAlerts = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const handleMarkAsRead = async (id: number) => {
     try {

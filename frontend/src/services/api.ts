@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 export async function fetchHealth() {
   const res = await fetch(`${API_BASE_URL}/health`);
@@ -12,7 +12,7 @@ export async function fetchStats() {
   return res.json();
 }
 
-export async function predictImpact(data: any) {
+export async function predictImpact(data: Record<string, unknown>) {
   const res = await fetch(`${API_BASE_URL}/predict`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

@@ -2,9 +2,25 @@ import { useState } from 'react';
 import { predictImpact } from '../services/api';
 import { ShieldAlert, BarChart3, Crosshair, Zap, Navigation, Clock, Activity } from 'lucide-react';
 
+interface PredictionResult {
+  prediction: {
+    impact_severity: string;
+    severity_probability: number;
+    clearance_time_hours: number;
+    road_closure_probability: number;
+  };
+  recommendation: {
+    recommended_personnel: number;
+    diversions_required: boolean;
+  };
+  explanation: {
+    top_features: Array<{ feature: string; value: number }>;
+  } | null;
+}
+
 export default function PredictPage() {
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<PredictionResult | null>(null);
   const [error, setError] = useState('');
 
   const [formData, setFormData] = useState({
@@ -37,15 +53,16 @@ export default function PredictPage() {
           diversions_required: res.activate_diversion_plan || false,
         },
         explanation: res.explanation ? {
-          top_features: res.explanation.map((f: any) => ({
+          top_features: res.explanation.map((f: { feature: string; contribution?: number }) => ({
             feature: f.feature,
             value: f.contribution || 0.0,
           }))
         } : null,
       };
       setResult(mappedRes);
-    } catch (err: any) {
-      setError(err.message || 'Failed to generate prediction');
+    } catch (err) {
+      const errorWithMessage = err as Error;
+      setError(errorWithMessage.message || 'Failed to generate prediction');
     } finally {
       setLoading(false);
     }
@@ -266,7 +283,7 @@ export default function PredictPage() {
                     AI Decision Factors (SHAP)
                   </h3>
                   <div className="space-y-4">
-                    {result.explanation.top_features.map((f: any, i: number) => (
+                    {result.explanation.top_features.map((f: { feature: string; value: number }, i: number) => (
                       <div key={i}>
                         <div className="flex items-center justify-between mb-1.5">
                           <span className="text-xs font-medium text-[var(--foreground)] font-mono">{f.feature}</span>

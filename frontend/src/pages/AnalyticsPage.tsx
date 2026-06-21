@@ -28,21 +28,38 @@ export default function AnalyticsPage() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
-  async function loadMetrics() {
-    setLoading(true);
-    try {
-      const data = await fetchModelMetrics();
-      setMetrics(data);
-    } catch (err) {
-      console.error('Failed to load metrics:', err);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
-    loadMetrics();
-  }, []);
+    let active = true;
+    async function getMetrics() {
+      try {
+        const data = await fetchModelMetrics();
+        if (active) {
+          setMetrics(data);
+        }
+      } catch (err) {
+        console.error('Failed to load metrics:', err);
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    Promise.resolve().then(() => {
+      if (active) setLoading(true);
+    });
+    getMetrics();
+
+    return () => {
+      active = false;
+    };
+  }, [refreshTrigger]);
+
+  const loadMetrics = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   if (loading) {
     return (
