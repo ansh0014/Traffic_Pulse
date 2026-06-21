@@ -13,7 +13,7 @@ export async function fetchStats() {
 }
 
 export async function predictImpact(data: Record<string, unknown>) {
-  const res = await fetch(`${API_BASE_URL}/predict`, {
+  const res = await fetch(`${API_BASE_URL}/predict?explain=true`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
