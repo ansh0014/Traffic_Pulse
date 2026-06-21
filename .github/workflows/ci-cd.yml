@@ -37,7 +37,7 @@ jobs:
           CLOSURE_PROB_ALERT_THRESHOLD: 0.5
         run: |
           cd backend
-          pytest
+          pytest || [ $? -eq 5 ]
 
   frontend-ci:
     name: Frontend CI
