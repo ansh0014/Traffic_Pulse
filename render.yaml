@@ -18,7 +18,6 @@ services:
       - key: LOG_LEVEL
         value: info
       - key: CORS_ORIGINS
-        value: URL
         sync: false
       - key: HIGH_IMPACT_CLEARANCE_THRESHOLD_MIN
         value: 120.0
