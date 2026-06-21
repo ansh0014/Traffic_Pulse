@@ -15,8 +15,9 @@ settings = get_settings()
 connect_args = {}
 if settings.database_url.startswith("postgresql"):
     connect_args = {
-        "prepared_statement_cache_size": 0,
         "ssl": "require",
+        "prepared_statement_cache_size": 0,  # Disables SQLAlchemy prepared statement cache
+        "statement_cache_size": 0,           # Disables asyncpg statement cache
     }
 
 engine = create_async_engine(
