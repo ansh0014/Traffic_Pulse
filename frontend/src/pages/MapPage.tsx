@@ -24,21 +24,38 @@ export default function MapPage() {
   const [loading, setLoading] = useState(true);
   const [filterTier, setFilterTier] = useState<string>('');
 
-  async function loadMapData() {
-    setLoading(true);
-    try {
-      const data = await fetchMapIncidents();
-      setIncidents(data.incidents || []);
-    } catch (err) {
-      console.error('Failed to load map data:', err);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
-    loadMapData();
-  }, []);
+    let active = true;
+    async function getMapData() {
+      try {
+        const data = await fetchMapIncidents();
+        if (active) {
+          setIncidents(data.incidents || []);
+        }
+      } catch (err) {
+        console.error('Failed to load map data:', err);
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    Promise.resolve().then(() => {
+      if (active) setLoading(true);
+    });
+    getMapData();
+
+    return () => {
+      active = false;
+    };
+  }, [refreshTrigger]);
+
+  const loadMapData = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const filteredIncidents = filterTier
     ? incidents.filter((inc) => inc.impact_tier === filterTier)
