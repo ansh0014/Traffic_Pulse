@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: traffic-pulse-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: MODEL_DIR
+        value: ../Model
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 8000
+      - key: LOG_LEVEL
+        value: info
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: HIGH_IMPACT_CLEARANCE_THRESHOLD_MIN
+        value: 120.0
+      - key: CLOSURE_PROB_ALERT_THRESHOLD
+        value: 0.5
