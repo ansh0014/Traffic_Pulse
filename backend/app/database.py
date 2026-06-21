@@ -11,12 +11,21 @@ from app.config import get_settings
 logger = logging.getLogger("traffic_pulse.db")
 settings = get_settings()
 
+# Configure connection arguments conditionally (avoid breaking SQLite tests)
+connect_args = {}
+if settings.database_url.startswith("postgresql"):
+    connect_args = {
+        "prepared_statement_cache_size": 0,
+        "ssl": "require",
+    }
+
 engine = create_async_engine(
     settings.database_url,
     echo=settings.log_level == "DEBUG",
     pool_size=5,
     max_overflow=10,
     pool_pre_ping=True,   # drops stale connections automatically
+    connect_args=connect_args,
 )
 
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
