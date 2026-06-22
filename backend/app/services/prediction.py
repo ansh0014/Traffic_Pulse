@@ -42,24 +42,36 @@ class PredictionService:
 
     def featurize(self, event: dict) -> pd.DataFrame:
         """Convert a raw event dict into a model-ready feature DataFrame."""
-        ts = pd.Timestamp(event["start_datetime"])
-        cause = str(event.get("event_cause", "others")).lower()
-        corridor = event.get("corridor", "Non-corridor")
+        # Robustly parse timestamp — handle both naive and tz-aware strings
+        raw_ts = event["start_datetime"]
+        try:
+            ts = pd.Timestamp(raw_ts)
+            if ts.tzinfo is not None:
+                ts = ts.tz_convert("UTC").tz_localize(None)  # strip tz for feature extraction
+        except Exception:
+            logger.warning("Could not parse start_datetime %r, falling back to now", raw_ts)
+            ts = pd.Timestamp.now()
+
+        # Normalise cause and corridor up-front so they're reused safely in all lookups
+        cause = str(event.get("event_cause", "others")).lower().strip()
+        corridor = str(event.get("corridor", "Non-corridor")).strip()
 
         row = {
-            "event_type": event.get("event_type", "unplanned"),
+            "event_type": str(event.get("event_type", "unplanned")),
             "event_cause": cause,
             "corridor": corridor,
-            "zone": event.get("zone", "Unknown"),
-            "veh_type": event.get("veh_type", "Unknown"),
-            "police_station": event.get("police_station", "Unknown"),
-            "latitude": event.get("latitude", 12.97),
-            "longitude": event.get("longitude", 77.59),
-            "hour": ts.hour,
-            "dow": ts.dayofweek,
-            "month": ts.month,
+            "zone": str(event.get("zone", "Unknown")),
+            "veh_type": str(event.get("veh_type", "Unknown")),
+            "police_station": str(event.get("police_station", "Unknown")),
+            # Coerce lat/lon to float in case they arrive as strings from JSON form data
+            "latitude": float(event.get("latitude", 12.97)),
+            "longitude": float(event.get("longitude", 77.59)),
+            "hour": int(ts.hour),
+            "dow": int(ts.dayofweek),
+            "month": int(ts.month),
             "is_weekend": int(ts.dayofweek >= 5),
             "is_peak_hour": int(ts.hour in [8, 9, 10, 17, 18, 19, 20]),
+            # Historical lookup features — use pre-computed `cause` and `corridor` strings
             "corridor_event_volume": self.lookups["corridor_event_volume"].get(corridor, 0),
             "cause_hist_closure_rate": self.lookups["cause_hist_closure_rate"].get(
                 cause, self.lookups["global_closure_rate"]
@@ -77,26 +89,42 @@ class PredictionService:
         Returns dict with:
             impact_tier, impact_confidence, closure_probability, expected_clearance_min
         """
-        X = self.featurize(event)
+        try:
+            X = self.featurize(event)
+        except Exception as exc:
+            logger.error("Feature extraction failed for event %r: %s", event, exc, exc_info=True)
+            raise ValueError(f"Feature extraction failed: {exc}") from exc
 
-        # Impact severity
-        impact_tier = self.impact_model.predict(X)[0]
-        impact_proba = dict(
-            zip(
-                self.impact_model.classes_,
-                self.impact_model.predict_proba(X)[0].round(4),
+        try:
+            # Impact severity
+            impact_tier = self.impact_model.predict(X)[0]
+            impact_proba = dict(
+                zip(
+                    self.impact_model.classes_,
+                    self.impact_model.predict_proba(X)[0].round(4),
+                )
             )
-        )
-        # Ensure all tiers present
-        for tier in ("Low", "Medium", "High"):
-            impact_proba.setdefault(tier, 0.0)
+            # Ensure all tiers present even if a class wasn't in training
+            for tier in ("Low", "Medium", "High"):
+                impact_proba.setdefault(tier, 0.0)
+        except Exception as exc:
+            logger.error("Impact model inference failed: %s", exc, exc_info=True)
+            raise ValueError(f"Impact severity model failed: {exc}") from exc
 
-        # Road closure probability
-        closure_proba = float(self.closure_model.predict_proba(X)[0][1])
+        try:
+            # Road closure probability
+            closure_proba = float(self.closure_model.predict_proba(X)[0][1])
+        except Exception as exc:
+            logger.warning("Closure model failed (%s), defaulting to 0.0", exc)
+            closure_proba = 0.0
 
-        # Clearance time (model predicts log1p, we invert)
-        duration_pred = float(np.expm1(self.duration_model.predict(X)[0]))
-        duration_pred = max(1.0, duration_pred)  # floor at 1 minute
+        try:
+            # Clearance time (model predicts log1p, we invert)
+            duration_pred = float(np.expm1(self.duration_model.predict(X)[0]))
+            duration_pred = max(1.0, duration_pred)  # floor at 1 minute
+        except Exception as exc:
+            logger.warning("Duration model failed (%s), defaulting to global median", exc)
+            duration_pred = float(self.lookups.get("global_median_duration", 60.0))
 
         return {
             "impact_tier": impact_tier,

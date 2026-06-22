@@ -18,7 +18,15 @@ export async function predictImpact(data: Record<string, unknown>) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Prediction failed');
+  if (!res.ok) {
+    // Try to extract the backend's error detail before throwing
+    let detail = `Prediction failed (HTTP ${res.status})`;
+    try {
+      const errBody = await res.json();
+      if (errBody?.detail) detail = errBody.detail;
+    } catch { /* ignore JSON parse errors */ }
+    throw new Error(detail);
+  }
   return res.json();
 }
 

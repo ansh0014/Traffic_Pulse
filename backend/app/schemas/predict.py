@@ -41,12 +41,12 @@ class PredictRequest(BaseModel):
         description="Nearest police station"
     )
     latitude: float = Field(
-        default=12.97, ge=12.0, le=14.0,
-        description="Latitude (Bengaluru range)"
+        default=12.97, ge=-90.0, le=90.0,
+        description="Latitude"
     )
     longitude: float = Field(
-        default=77.59, ge=77.0, le=78.5,
-        description="Longitude (Bengaluru range)"
+        default=77.59, ge=-180.0, le=180.0,
+        description="Longitude"
     )
     start_datetime: datetime = Field(
         description="Event start date/time"

@@ -23,14 +23,20 @@ export default function PredictPage() {
   const [result, setResult] = useState<PredictionResult | null>(null);
   const [error, setError] = useState('');
 
-  const [formData, setFormData] = useState({
-    latitude: 12.9716,
-    longitude: 77.5946,
+  const [formData, setFormData] = useState<{
+    latitude: string;
+    longitude: string;
+    event_cause: string;
+    start_datetime: string;
+  }>({
+    latitude: '12.9716',
+    longitude: '77.5946',
     event_cause: 'vehicle_breakdown',
     start_datetime: new Date().toISOString().slice(0, 16),
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    // Store as string — coercion happens at submit to avoid NaN while the user is mid-edit
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -39,7 +45,15 @@ export default function PredictPage() {
     setLoading(true);
     setError('');
     try {
-      const payload = { ...formData, start_datetime: new Date(formData.start_datetime).toISOString() };
+      const lat = parseFloat(formData.latitude);
+      const lon = parseFloat(formData.longitude);
+      const payload = {
+        ...formData,
+        // Safe coercion at submit-time — fall back to Bengaluru centre if field is blank/invalid
+        latitude: isNaN(lat) ? 12.9716 : lat,
+        longitude: isNaN(lon) ? 77.5946 : lon,
+        start_datetime: new Date(formData.start_datetime).toISOString(),
+      };
       const res = await predictImpact(payload);
       const mappedRes = {
         prediction: {

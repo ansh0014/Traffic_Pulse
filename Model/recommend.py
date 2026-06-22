@@ -37,28 +37,37 @@ class ResourceRecommender:
     def _featurize(self, event: dict) -> pd.DataFrame:
         """event: dict with keys event_type, event_cause, corridor, zone,
         veh_type, police_station, latitude, longitude, start_datetime (str/Timestamp)"""
-        ts = pd.Timestamp(event["start_datetime"])
+        raw_ts = event["start_datetime"]
+        try:
+            ts = pd.Timestamp(raw_ts)
+            if ts.tzinfo is not None:
+                ts = ts.tz_convert("UTC").tz_localize(None)
+        except Exception:
+            ts = pd.Timestamp.now()
+
+        # Pre-compute normalised strings so lookups are readable and unambiguous
+        cause = str(event.get("event_cause", "others")).lower().strip()
+        corridor = str(event.get("corridor", "Non-corridor")).strip()
+
         row = {
-            "event_type": event.get("event_type", "unplanned"),
-            "event_cause": str(event.get("event_cause", "others")).lower(),
-            "corridor": event.get("corridor", "Non-corridor"),
-            "zone": event.get("zone", "Unknown"),
-            "veh_type": event.get("veh_type", "Unknown"),
-            "police_station": event.get("police_station", "Unknown"),
-            "latitude": event.get("latitude", 12.97),
-            "longitude": event.get("longitude", 77.59),
-            "hour": ts.hour,
-            "dow": ts.dayofweek,
-            "month": ts.month,
+            "event_type": str(event.get("event_type", "unplanned")),
+            "event_cause": cause,
+            "corridor": corridor,
+            "zone": str(event.get("zone", "Unknown")),
+            "veh_type": str(event.get("veh_type", "Unknown")),
+            "police_station": str(event.get("police_station", "Unknown")),
+            "latitude": float(event.get("latitude", 12.97)),
+            "longitude": float(event.get("longitude", 77.59)),
+            "hour": int(ts.hour),
+            "dow": int(ts.dayofweek),
+            "month": int(ts.month),
             "is_weekend": int(ts.dayofweek >= 5),
             "is_peak_hour": int(ts.hour in [8, 9, 10, 17, 18, 19, 20]),
-            "corridor_event_volume": self.lookups["corridor_event_volume"].get(
-                event.get("corridor", "Non-corridor"), 0),
+            "corridor_event_volume": self.lookups["corridor_event_volume"].get(corridor, 0),
             "cause_hist_closure_rate": self.lookups["cause_hist_closure_rate"].get(
-                row_cause := str(event.get("event_cause", "others")).lower(),
-                self.lookups["global_closure_rate"]),
+                cause, self.lookups["global_closure_rate"]),
             "cause_hist_median_duration": self.lookups["cause_hist_median_duration"].get(
-                row_cause, self.lookups["global_median_duration"]),
+                cause, self.lookups["global_median_duration"]),
         }
         return pd.DataFrame([row])
 
