@@ -57,6 +57,10 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+
+
+
+
 # Configure CORS allowed origins and credentials dynamically
 cors_origins = settings.cors_origin_list
 allow_credentials = True
