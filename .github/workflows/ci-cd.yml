@@ -27,7 +27,7 @@ jobs:
 
       - name: Run backend tests
         env:
-          DATABASE_URL: sqlite+aiosqlite:///:memory:
+          DATABASE_URL: "sqlite+aiosqlite:///:memory:"
           MODEL_DIR: Model
           HOST: 0.0.0.0
           PORT: 8000
