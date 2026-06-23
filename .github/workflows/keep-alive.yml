@@ -1,0 +1,17 @@
+name: Keep Backend Alive
+
+on:
+  schedule:
+    - cron: '*/10 * * * *' 
+  workflow_dispatch 
+
+jobs:
+  ping-health:
+    name: Ping Health Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit Health Endpoint
+        run: |
+          echo "Pinging backend health endpoint..."
+          curl -f -s https://traffic-pulse-backend.onrender.com/api/v1/health
+          echo "Backend is alive!"
