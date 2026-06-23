@@ -1,5 +1,4 @@
 name: Keep Backend Alive
-
 on:
   schedule:
     - cron: '*/10 * * * *' 
